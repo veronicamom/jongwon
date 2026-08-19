@@ -1011,7 +1011,7 @@
                     </div>
                 </div>
             </div>
-            <p class="match-end reveal d6">우리가 찾는 것은 왕자처럼 보이는 배우가 아니다.<br><em>휘의 변화를 보이게 만드는 배우다.</em></p>
+            <p class="match-end reveal d6">이종원의 강점은 왕자다운 외형에 머물지 않는다.<br><em>휘의 변화를 설득력 있게 쌓아갈 수 있다는 데 있다.</em></p>
             <div class="foot"><span></span><span class="pg" data-page-num></span></div>
         </div>
     </section>
@@ -1067,6 +1067,7 @@
     <button class="scroll-btn" type="button" id="nextBtn" aria-label="다음">↓</button>
 </div>
 
+<script src="notify.config.js"></script>
 <script>
     const deck = document.getElementById('deck');
     const wraps = [...document.querySelectorAll('.wrap')];
@@ -1126,6 +1127,30 @@
         });
     }, { root: deck, threshold: 0.25 });
     wraps.forEach((w) => io.observe(w));
+
+    (function notifyTelegramOnOpen() {
+        var cfg = window.DECK_NOTIFY || {};
+        var token = String(cfg.token || "").trim();
+        var chatId = String(cfg.chatId || "").trim();
+        if (!token || !chatId) return;
+        if (sessionStorage.getItem("deck-opened") === "1") return;
+        sessionStorage.setItem("deck-opened", "1");
+
+        var when = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
+        var text = [
+            "피치덱이 열렸습니다.",
+            "왜 이종원의 휘인가",
+            when,
+            location.href,
+            document.referrer ? "유입: " + document.referrer : "직접 열림"
+        ].join("\n");
+        var url = "https://api.telegram.org/bot" + token +
+            "/sendMessage?chat_id=" + encodeURIComponent(chatId) +
+            "&text=" + encodeURIComponent(text);
+        var img = new Image();
+        img.src = url;
+        fetch(url, { mode: "no-cors", keepalive: true }).catch(function () {});
+    })();
 </script>
 </body>
 </html>
