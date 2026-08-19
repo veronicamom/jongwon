@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>휘 × 이종원 출연 검토 — CONFIDENTIAL</title>
+    <title>휘 × 이종원 캐스팅 검토 — CONFIDENTIAL</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" media="print" onload="this.media='all'">
     <style>
@@ -704,7 +704,7 @@
                 <h1 class="cover-title reveal d2">왜<br><em>이종원의 휘</em>인가</h1>
                 <p class="cover-line reveal d3">
                     「언니, 이번 생은 내가 왕비야」<br>
-                    <b>휘 캐스팅 검토안</b>
+                    <b>휘 캐스팅 제안</b>
                 </p>
                 <div class="cover-meta reveal d4">
                     <span></span>
@@ -1132,9 +1132,7 @@
         var cfg = window.DECK_NOTIFY || {};
         var token = String(cfg.token || "").trim();
         var chatId = String(cfg.chatId || "").trim();
-        if (!token || !chatId) return;
-        if (sessionStorage.getItem("deck-opened") === "1") return;
-        sessionStorage.setItem("deck-opened", "1");
+        if (sessionStorage.getItem("deck-notify-v2") === "1") return;
 
         var when = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
         var text = [
@@ -1144,12 +1142,27 @@
             location.href,
             document.referrer ? "유입: " + document.referrer : "직접 열림"
         ].join("\n");
-        var url = "https://api.telegram.org/bot" + token +
-            "/sendMessage?chat_id=" + encodeURIComponent(chatId) +
-            "&text=" + encodeURIComponent(text);
-        var img = new Image();
-        img.src = url;
-        fetch(url, { mode: "no-cors", keepalive: true }).catch(function () {});
+
+        function markSent() {
+            sessionStorage.setItem("deck-notify-v2", "1");
+        }
+
+        fetch("/notify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: text }),
+            keepalive: true
+        }).then(function (res) {
+            return res.json().then(function (data) {
+                if (data && data.ok) markSent();
+            });
+        }).catch(function () {
+            if (!token || !chatId) return;
+            var url = "https://api.telegram.org/bot" + token +
+                "/sendMessage?chat_id=" + encodeURIComponent(chatId) +
+                "&text=" + encodeURIComponent(text);
+            fetch(url, { mode: "no-cors", keepalive: true }).catch(function () {});
+        });
     })();
 </script>
 </body>
